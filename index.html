@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>쇼핑 리스트</title>
-<style>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;title&gt;쇼핑 리스트&lt;/title&gt;
+&lt;style&gt;
   :root {
     --bg: #f5f6fa;
     --card: #ffffff;
@@ -164,29 +164,34 @@
     padding: 30px 0;
     font-size: 0.9rem;
   }
-</style>
-</head>
-<body>
-  <div class="app">
-    <h1>🛒 쇼핑 리스트</h1>
-    <p class="subtitle">브라우저에 자동 저장됩니다</p>
-    <div class="card">
-      <div class="input-row">
-        <input type="text" id="itemInput" placeholder="살 물건을 입력하세요" maxlength="100" autofocus>
-        <button id="addBtn">추가</button>
-      </div>
-      <div class="stats">
-        <span id="statsText">총 0개 · 완료 0개</span>
-        <button id="clearCheckedBtn">체크된 항목 삭제</button>
-      </div>
-      <ul class="list" id="list"></ul>
-      <div class="empty" id="emptyMsg" style="display:none;">아직 담긴 항목이 없어요</div>
-    </div>
-  </div>
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="app"&gt;
+    &lt;h1&gt;🛒 쇼핑 리스트&lt;/h1&gt;
+    &lt;p class="subtitle"&gt;Supabase 데이터베이스에 자동 저장됩니다&lt;/p&gt;
+    &lt;div class="card"&gt;
+      &lt;div class="input-row"&gt;
+        &lt;input type="text" id="itemInput" placeholder="살 물건을 입력하세요" maxlength="100" autofocus&gt;
+        &lt;button id="addBtn"&gt;추가&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class="stats"&gt;
+        &lt;span id="statsText"&gt;총 0개 · 완료 0개&lt;/span&gt;
+        &lt;button id="clearCheckedBtn"&gt;체크된 항목 삭제&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;ul class="list" id="list"&gt;&lt;/ul&gt;
+      &lt;div class="empty" id="emptyMsg" style="display:none;"&gt;아직 담긴 항목이 없어요&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
-<script>
-(function () {
-  const STORAGE_KEY = "shopping-list-items";
+&lt;script type="module"&gt;
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+(async function () {
+  const SUPABASE_URL = "https://otopspgvhpmgxmjnyjzu.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_eRHhCzgPVFDokXxqyFU3Aw_F7Ew1BcM";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
   const input = document.getElementById("itemInput");
   const addBtn = document.getElementById("addBtn");
   const listEl = document.getElementById("list");
@@ -194,19 +199,19 @@
   const statsText = document.getElementById("statsText");
   const clearCheckedBtn = document.getElementById("clearCheckedBtn");
 
-  let items = loadItems();
+  let items = [];
 
-  function loadItems() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
+  async function loadItems() {
+    const { data, error } = await supabase
+      .from("shopping_items")
+      .select("*")
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.error(error);
+      return;
     }
-  }
-
-  function saveItems() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    items = data;
+    render();
   }
 
   function render() {
@@ -247,32 +252,59 @@
     statsText.textContent = `총 ${total}개 · 완료 ${checked}개`;
   }
 
-  function addItem() {
+  async function addItem() {
     const text = input.value.trim();
     if (!text) return;
-    items.push({ id: Date.now() + Math.random(), text, checked: false });
     input.value = "";
     input.focus();
-    saveItems();
+    const { data, error } = await supabase
+      .from("shopping_items")
+      .insert({ text })
+      .select()
+      .single();
+    if (error) {
+      console.error(error);
+      return;
+    }
+    items.push(data);
     render();
   }
 
-  function toggleItem(id) {
+  async function toggleItem(id) {
     const item = items.find((i) => i.id === id);
-    if (item) item.checked = !item.checked;
-    saveItems();
+    if (!item) return;
+    const checked = !item.checked;
+    const { error } = await supabase
+      .from("shopping_items")
+      .update({ checked })
+      .eq("id", id);
+    if (error) {
+      console.error(error);
+      return;
+    }
+    item.checked = checked;
     render();
   }
 
-  function deleteItem(id) {
+  async function deleteItem(id) {
+    const { error } = await supabase.from("shopping_items").delete().eq("id", id);
+    if (error) {
+      console.error(error);
+      return;
+    }
     items = items.filter((i) => i.id !== id);
-    saveItems();
     render();
   }
 
-  function clearChecked() {
+  async function clearChecked() {
+    const checkedIds = items.filter((i) => i.checked).map((i) => i.id);
+    if (checkedIds.length === 0) return;
+    const { error } = await supabase.from("shopping_items").delete().in("id", checkedIds);
+    if (error) {
+      console.error(error);
+      return;
+    }
     items = items.filter((i) => !i.checked);
-    saveItems();
     render();
   }
 
@@ -282,8 +314,8 @@
   });
   clearCheckedBtn.addEventListener("click", clearChecked);
 
-  render();
+  await loadItems();
 })();
-</script>
-</body>
-</html>
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
