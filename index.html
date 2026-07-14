@@ -1,10 +1,10 @@
-&lt;!DOCTYPE html&gt;
-&lt;html lang="ko"&gt;
-&lt;head&gt;
-&lt;meta charset="UTF-8"&gt;
-&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-&lt;title&gt;쇼핑 리스트&lt;/title&gt;
-&lt;style&gt;
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쇼핑 리스트</title>
+<style>
   :root {
     --bg: #f5f6fa;
     --card: #ffffff;
@@ -164,27 +164,27 @@
     padding: 30px 0;
     font-size: 0.9rem;
   }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-  &lt;div class="app"&gt;
-    &lt;h1&gt;🛒 쇼핑 리스트&lt;/h1&gt;
-    &lt;p class="subtitle"&gt;Supabase 데이터베이스에 자동 저장됩니다&lt;/p&gt;
-    &lt;div class="card"&gt;
-      &lt;div class="input-row"&gt;
-        &lt;input type="text" id="itemInput" placeholder="살 물건을 입력하세요" maxlength="100" autofocus&gt;
-        &lt;button id="addBtn"&gt;추가&lt;/button&gt;
-      &lt;/div&gt;
-      &lt;div class="stats"&gt;
-        &lt;span id="statsText"&gt;총 0개 · 완료 0개&lt;/span&gt;
-        &lt;button id="clearCheckedBtn"&gt;체크된 항목 삭제&lt;/button&gt;
-      &lt;/div&gt;
-      &lt;ul class="list" id="list"&gt;&lt;/ul&gt;
-      &lt;div class="empty" id="emptyMsg" style="display:none;"&gt;아직 담긴 항목이 없어요&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
+</style>
+</head>
+<body>
+  <div class="app">
+    <h1>🛒 쇼핑 리스트</h1>
+    <p class="subtitle">Supabase 데이터베이스에 자동 저장됩니다</p>
+    <div class="card">
+      <div class="input-row">
+        <input type="text" id="itemInput" placeholder="살 물건을 입력하세요" maxlength="100" autofocus>
+        <button id="addBtn">추가</button>
+      </div>
+      <div class="stats">
+        <span id="statsText">총 0개 · 완료 0개</span>
+        <button id="clearCheckedBtn">체크된 항목 삭제</button>
+      </div>
+      <ul class="list" id="list"></ul>
+      <div class="empty" id="emptyMsg" style="display:none;">아직 담긴 항목이 없어요</div>
+    </div>
+  </div>
 
-&lt;script type="module"&gt;
+<script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 (async function () {
@@ -316,6 +316,6 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
   await loadItems();
 })();
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
+</script>
+</body>
+</html>
